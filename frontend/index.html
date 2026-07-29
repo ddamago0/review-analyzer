@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Analyzer</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Review Analyzer</h1>
+
+        <p class="subtitle">
+            Analizador de reseñas con optimización de tokens
+        </p>
+
+        <div class="section">
+
+            <label>Modo de carga</label>
+
+            <div class="radio-group">
+
+                <label>
+                    <input
+                        type="radio"
+                        name="mode"
+                        value="file"
+                        checked>
+                    Archivo Excel
+                </label>
+
+                <label>
+                    <input
+                        type="radio"
+                        name="mode"
+                        value="folder">
+                    Carpeta
+                </label>
+
+            </div>
+
+        </div>
+
+        <div class="section">
+
+            <label>
+
+                Seleccionar archivo
+
+            </label>
+
+            <input
+                type="file"
+                id="fileInput"
+                accept=".xlsx">
+
+        </div>
+
+        <div class="section">
+
+            <label>
+
+                Optimización de tokens
+
+            </label>
+
+            <label class="checkbox">
+
+                <input
+                    type="checkbox"
+                    id="optimize"
+                    checked>
+
+                Activar optimización
+
+            </label>
+
+        </div>
+
+        <button id="analyzeButton">
+
+            Analizar reseñas
+
+        </button>
+
+        <div id="results">
+
+            Esperando análisis...
+
+        </div>
+
+    </div>
+
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>
