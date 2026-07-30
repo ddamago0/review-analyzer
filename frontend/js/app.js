@@ -1,8 +1,9 @@
 const API_URL = "http://127.0.0.1:8000/api";
 
-// ============================
-// ELEMENTOS
-// ============================
+
+// ======================================
+// ELEMENTOS DEL DOM
+// ======================================
 
 const filesInput = document.getElementById("files");
 const folderInput = document.getElementById("folder");
@@ -22,11 +23,29 @@ const radios = document.querySelectorAll(
     'input[name="limitType"]'
 );
 
+// Dashboard
+
+const chartCanvas = document.getElementById("wordsChart");
+const tableContainer = document.getElementById("topWordsTable");
+const previewContainer = document.getElementById("reviewsPreview");
+
+// Exportaciones
+
+const exportJsonBtn = document.getElementById("exportJson");
+const exportCsvBtn = document.getElementById("exportCsv");
+const exportExcelBtn = document.getElementById("exportExcel");
+
+// ======================================
+
 let currentFiles = [];
 
-// ============================
+let chart = null;
+
+let lastResponse = null;
+
+// ======================================
 // EVENTOS
-// ============================
+// ======================================
 
 btnFiles.addEventListener("click", () => {
 
@@ -56,6 +75,8 @@ folderInput.addEventListener("change", e => {
 
 });
 
+// ======================================
+
 radios.forEach(radio => {
 
     radio.addEventListener("change", () => {
@@ -63,15 +84,17 @@ radios.forEach(radio => {
         customLimit.disabled =
             radio.value !== "limit" || !radio.checked;
 
-        if(customLimit.disabled){
+        if (customLimit.disabled) {
 
-            customLimit.value="";
+            customLimit.value = "";
 
         }
 
     });
 
 });
+
+// ======================================
 
 uploadButton.addEventListener(
 
@@ -81,15 +104,15 @@ uploadButton.addEventListener(
 
 );
 
-// ============================
+// ======================================
 // MOSTRAR ARCHIVOS
-// ============================
+// ======================================
 
-function renderFiles(){
+function renderFiles() {
 
-    if(currentFiles.length===0){
+    if (currentFiles.length === 0) {
 
-        selectedFiles.innerHTML=`
+        selectedFiles.innerHTML = `
 
             <div class="empty">
 
@@ -103,15 +126,15 @@ function renderFiles(){
 
     }
 
-    selectedFiles.innerHTML="";
+    selectedFiles.innerHTML = "";
 
-    currentFiles.forEach(file=>{
+    currentFiles.forEach(file => {
 
-        const div=document.createElement("div");
+        const div = document.createElement("div");
 
-        div.className="file-item";
+        div.className = "file-item";
 
-        div.innerHTML=`
+        div.innerHTML = `
 
             📄 <strong>${file.name}</strong>
 
@@ -127,29 +150,27 @@ function renderFiles(){
 
 }
 
-// ============================
+// ======================================
 
-function formatSize(bytes){
+function formatSize(bytes) {
 
-    if(bytes<1024)
+    if (bytes < 1024)
+        return bytes + " B";
 
-        return bytes+" B";
+    if (bytes < 1024 * 1024)
+        return (bytes / 1024).toFixed(1) + " KB";
 
-    if(bytes<1024*1024)
-
-        return (bytes/1024).toFixed(1)+" KB";
-
-    return (bytes/(1024*1024)).toFixed(2)+" MB";
+    return (bytes / (1024 * 1024)).toFixed(2) + " MB";
 
 }
 
-// ============================
-// SUBIR
-// ============================
+// ======================================
+// SUBIR ARCHIVOS
+// ======================================
 
-async function uploadFiles(){
+async function uploadFiles() {
 
-    if(currentFiles.length===0){
+    if (currentFiles.length === 0) {
 
         alert(
 
@@ -161,9 +182,9 @@ async function uploadFiles(){
 
     }
 
-    const formData=new FormData();
+    const formData = new FormData();
 
-    currentFiles.forEach(file=>{
+    currentFiles.forEach(file => {
 
         formData.append(
 
@@ -175,7 +196,7 @@ async function uploadFiles(){
 
     });
 
-    if(!customLimit.disabled){
+    if (!customLimit.disabled) {
 
         formData.append(
 
@@ -187,33 +208,43 @@ async function uploadFiles(){
 
     }
 
-    try{
+    try {
 
-        uploadButton.disabled=true;
+        uploadButton.disabled = true;
 
-        uploadButton.textContent="Procesando...";
+        uploadButton.innerHTML = "Procesando...";
 
-        status.innerHTML="📤 Subiendo archivos...";
+        status.innerHTML = "📤 Analizando archivos...";
 
-        result.innerHTML="";
+        result.innerHTML = "";
 
-        const response=await fetch(
+        tableContainer.innerHTML = "";
+
+        previewContainer.innerHTML = "";
+
+        if (chart) {
+
+            chart.destroy();
+
+        }
+
+        const response = await fetch(
 
             `${API_URL}/upload`,
 
             {
 
-                method:"POST",
+                method: "POST",
 
-                body:formData
+                body: formData
 
             }
 
         );
 
-        const data=await response.json();
+        const data = await response.json();
 
-        if(!response.ok){
+        if (!response.ok) {
 
             throw new Error(
 
@@ -223,19 +254,21 @@ async function uploadFiles(){
 
         }
 
-        status.innerHTML=
+        lastResponse = data;
 
-            "✅ Análisis finalizado correctamente.";
+        status.innerHTML =
+
+            "✅ Análisis completado correctamente.";
 
         renderStatistics(data);
 
     }
 
-    catch(error){
+    catch (error) {
 
-        status.innerHTML="❌ Error";
+        status.innerHTML = "❌ Error";
 
-        result.innerHTML=`
+        result.innerHTML = `
 
             <div class="error">
 
@@ -247,114 +280,414 @@ async function uploadFiles(){
 
     }
 
-    finally{
+    finally {
 
-        uploadButton.disabled=false;
+        uploadButton.disabled = false;
 
-        uploadButton.innerHTML="🚀 Analizar reseñas";
+        uploadButton.innerHTML =
+
+            "🚀 Iniciar análisis";
 
     }
 
 }
 
-// ============================
-// ESTADISTICAS
-// ============================
+// ======================================
+// ESTADÍSTICAS PRINCIPALES
+// ======================================
 
-function renderStatistics(response) {
+function renderStatistics(response){
 
     const d = response.data;
+
     const s = response.statistics;
-    const words = response.word_frequency;
-
-    let wordsHtml = "";
-
-    words.forEach(item => {
-
-        wordsHtml += `
-            <tr>
-                <td>${item.word}</td>
-                <td>${item.count.toLocaleString()}</td>
-            </tr>
-        `;
-
-    });
 
     result.innerHTML = `
 
         <div class="card">
-            <h3>📂 Archivos</h3>
+
+            <h3>📂 Archivos procesados</h3>
+
             <p>${response.files_processed}</p>
+
+            <small>
+
+                Cantidad de archivos Excel analizados.
+
+            </small>
+
         </div>
 
         <div class="card">
-            <h3>📄 Originales</h3>
+
+            <h3>📄 Reseñas cargadas</h3>
+
             <p>${d.total_original.toLocaleString()}</p>
+
+            <small>
+
+                Total de reseñas encontradas antes
+                del proceso de limpieza.
+
+            </small>
+
         </div>
 
         <div class="card">
-            <h3>🗑 Duplicadas</h3>
+
+            <h3>🗑 Duplicados eliminados</h3>
+
             <p>${d.duplicates_removed.toLocaleString()}</p>
+
+            <small>
+
+                Reseñas repetidas eliminadas
+                automáticamente.
+
+            </small>
+
         </div>
 
         <div class="card">
-            <h3>🚫 Vacías</h3>
+
+            <h3>🚫 Reseñas vacías eliminadas</h3>
+
             <p>${d.empty_removed.toLocaleString()}</p>
+
+            <small>
+
+                Registros sin contenido.
+
+            </small>
+
         </div>
 
         <div class="card">
-            <h3>✅ Finales</h3>
+
+            <h3>✅ Reseñas procesadas</h3>
+
             <p>${d.total_clean.toLocaleString()}</p>
+
+            <small>
+
+                Total de reseñas utilizadas
+                durante el análisis.
+
+            </small>
+
         </div>
 
         <div class="card">
-            <h3>📝 Longitud promedio</h3>
+
+            <h3>📝 Promedio de caracteres</h3>
+
             <p>${s.average_length}</p>
+
+            <small>
+
+                Cantidad promedio de caracteres
+                por reseña.
+
+            </small>
+
         </div>
 
         <div class="card">
-            <h3>🔤 Palabras promedio</h3>
+
+            <h3>🔤 Promedio de palabras</h3>
+
             <p>${s.average_words}</p>
+
+            <small>
+
+                Cantidad promedio de palabras
+                por reseña.
+
+            </small>
+
         </div>
 
         <div class="card">
-            <h3>📉 Más corta</h3>
+
+            <h3>📄 Longitud mínima</h3>
+
             <p>${s.shortest_review}</p>
+
+            <small>
+
+                Número de caracteres de la
+                reseña más corta.
+
+            </small>
+
         </div>
 
         <div class="card">
-            <h3>📈 Más larga</h3>
+
+            <h3>📄 Longitud máxima</h3>
+
             <p>${s.longest_review}</p>
-        </div>
 
-        <div class="table-card">
+            <small>
 
-            <h2>🔤 Top 20 palabras más frecuentes</h2>
+                Número de caracteres de la
+                reseña más extensa.
 
-            <table class="word-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>Palabra</th>
-
-                        <th>Frecuencia</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    ${wordsHtml}
-
-                </tbody>
-
-            </table>
+            </small>
 
         </div>
 
     `;
+
+    //renderWordChart(response.word_frequency);
+
+    renderWordTable(response.word_frequency);
+
+    renderReviewsPreview(d.reviews);
+
+    enableExportButtons();
+
+}
+
+// ======================================
+// GRÁFICO DE PALABRAS
+// ======================================
+
+function renderWordChart(words){
+
+    if(!words || words.length===0){
+
+        return;
+
+    }
+
+    if(chart){
+
+        chart.destroy();
+
+    }
+
+    const labels = words.map(item => item.word);
+
+    const values = words.map(item => item.count);
+
+    chart = new Chart(
+
+        chartCanvas,
+
+        {
+
+            type:"bar",
+
+            data:{
+
+                labels:labels,
+
+                datasets:[
+
+                    {
+
+                        label:"Frecuencia",
+
+                        data:values,
+
+                        borderWidth:1,
+
+                        borderRadius:8,
+
+                        backgroundColor:[
+
+                            "#2563eb",
+                            "#3b82f6",
+                            "#60a5fa",
+                            "#93c5fd",
+                            "#1d4ed8",
+                            "#2563eb",
+                            "#3b82f6",
+                            "#60a5fa",
+                            "#93c5fd",
+                            "#1d4ed8",
+                            "#2563eb",
+                            "#3b82f6",
+                            "#60a5fa",
+                            "#93c5fd",
+                            "#1d4ed8",
+                            "#2563eb",
+                            "#3b82f6",
+                            "#60a5fa",
+                            "#93c5fd",
+                            "#1d4ed8"
+
+                        ]
+
+                    }
+
+                ]
+
+            },
+
+            options:{
+
+                responsive:false,
+
+                maintainAspectRatio:true,
+
+                animation:false,
+
+                plugins:{
+
+                    legend:{
+                        display:false
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
+
+// ======================================
+// TABLA TOP PALABRAS
+// ======================================
+
+function renderWordTable(words){
+
+    if(!words || words.length===0){
+
+        tableContainer.innerHTML = `
+
+            <div class="empty">
+
+                No hay palabras para mostrar.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+    let html = `
+
+        <table class="word-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>#</th>
+
+                    <th>Palabra</th>
+
+                    <th>Frecuencia</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+    `;
+
+    words.forEach((item,index)=>{
+
+        html += `
+
+            <tr>
+
+                <td>${index+1}</td>
+
+                <td>${item.word}</td>
+
+                <td>${item.count.toLocaleString()}</td>
+
+            </tr>
+
+        `;
+
+    });
+
+    html += `
+
+            </tbody>
+
+        </table>
+
+    `;
+
+    tableContainer.innerHTML = html;
+
+}
+
+// ======================================
+// VISTA PREVIA DE RESEÑAS
+// ======================================
+
+function renderReviewsPreview(reviews){
+
+    if(!reviews || reviews.length===0){
+
+        previewContainer.innerHTML = `
+
+            <div class="empty">
+
+                No hay reseñas para mostrar.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+    const preview = reviews.slice(0,5);
+
+    let html = "";
+
+    preview.forEach((review,index)=>{
+
+        html += `
+
+            <div class="review-card">
+
+                <strong>
+
+                    Reseña ${index+1}
+
+                </strong>
+
+                <p>
+
+                    ${review}
+
+                </p>
+
+            </div>
+
+        `;
+
+    });
+
+    previewContainer.innerHTML = html;
+
+}
+
+// ======================================
+// ACTIVAR EXPORTACIONES
+// ======================================
+
+function enableExportButtons(){
+
+    exportJsonBtn.disabled = false;
+
+    exportCsvBtn.disabled = false;
+
+    exportExcelBtn.disabled = false;
 
 }

@@ -17,6 +17,9 @@
         href="css/style.css"
     >
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
@@ -25,20 +28,26 @@
 
     <header>
 
-        <h1>Review Analyzer</h1>
+        <h1>
+
+            Review Analyzer
+
+        </h1>
 
         <p>
 
-            Analizador local de reseñas
-            sin Inteligencia Artificial
+            Plataforma para el procesamiento y análisis
+            masivo de reseñas almacenadas en archivos Excel.
 
         </p>
 
     </header>
 
-    <!-- ============================= -->
-
     <section class="dashboard">
+
+        <!-- ========================================= -->
+        <!-- PANEL IZQUIERDO -->
+        <!-- ========================================= -->
 
         <section class="left-panel">
 
@@ -50,11 +59,11 @@
 
                 </h2>
 
-                <p>
+                <p class="panel-description">
 
-                    Selecciona uno o varios
-                    archivos Excel o una
-                    carpeta completa.
+                    Selecciona uno o varios archivos Excel
+                    o una carpeta completa para iniciar
+                    el análisis.
 
                 </p>
 
@@ -62,13 +71,13 @@
 
                     <button id="btnFiles">
 
-                        📄 Archivos
+                        📄 Seleccionar archivos
 
                     </button>
 
                     <button id="btnFolder">
 
-                        📁 Carpeta
+                        📁 Seleccionar carpeta
 
                     </button>
 
@@ -103,9 +112,17 @@
 
                 <h2>
 
-                    ⚙ Configuración
+                    ⚙ Configuración del análisis
 
                 </h2>
+
+                <p class="panel-description">
+
+                    Elige si deseas procesar todas las
+                    reseñas o solamente una cantidad
+                    específica.
+
+                </p>
 
                 <label>
 
@@ -116,7 +133,7 @@
                         name="limitType"
                     >
 
-                    Analizar todas
+                    Analizar todas las reseñas
 
                 </label>
 
@@ -128,7 +145,7 @@
                         name="limitType"
                     >
 
-                    Limitar cantidad
+                    Limitar cantidad de reseñas
 
                 </label>
 
@@ -138,7 +155,7 @@
 
                     type="number"
 
-                    placeholder="Ej: 1000"
+                    placeholder="Ejemplo: 1000"
 
                     disabled
 
@@ -152,7 +169,7 @@
 
                 >
 
-                    🚀 Analizar reseñas
+                    🚀 Iniciar análisis
 
                 </button>
 
@@ -160,17 +177,29 @@
 
         </section>
 
-        <!-- ============================= -->
+        <!-- ========================================= -->
+        <!-- PANEL DERECHO -->
+        <!-- ========================================= -->
 
         <section class="right-panel">
+
+            <!-- Estadísticas -->
 
             <div class="panel">
 
                 <h2>
 
-                    📊 Estadísticas
+                    📊 Resumen del análisis
 
                 </h2>
+
+                <p class="panel-description">
+
+                    Información general obtenida
+                    después del procesamiento
+                    de las reseñas.
+
+                </p>
 
                 <div
 
@@ -190,33 +219,145 @@
 
             </div>
 
+            <!-- Dashboard -->
+
             <div class="panel">
 
                 <h2>
 
-                    📈 Dashboard
+                    📈 Resultados visuales
 
                 </h2>
 
-                <div id="futureDashboard">
+                <p class="panel-description">
 
-                    Próximamente aparecerán aquí:
+                    Visualizaciones generadas a partir
+                    de las reseñas procesadas.
 
-                    <ul>
+                </p>
 
-                        <li>Top palabras</li>
+                <div class="dashboard-grid">
 
-                        <li>Longitud de reseñas</li>
+                    <!-- GRAFICO -->
 
-                        <li>Idiomas</li>
+                    <div class="dashboard-card">
 
-                        <li>Emojis</li>
+                        <h3>
 
-                        <li>WordCloud</li>
+                            📊 Palabras más utilizadas
 
-                        <li>Exportaciones</li>
+                        </h3>
 
-                    </ul>
+                        <p>
+
+                            Muestra las palabras con mayor
+                            número de apariciones después
+                            del proceso de limpieza.
+
+                        </p>
+
+                        <canvas id="wordsChart"></canvas>
+
+                    </div>
+
+                    <!-- TABLA -->
+
+                    <div class="dashboard-card">
+
+                        <h3>
+
+                            🔤 Top 20 palabras
+
+                        </h3>
+
+                        <p>
+
+                            Tabla con las veinte palabras
+                            más utilizadas dentro del
+                            conjunto de reseñas.
+
+                        </p>
+
+                        <div id="topWordsTable">
+
+                        </div>
+
+                    </div>
+
+                    <!-- VISTA PREVIA -->
+
+                    <div class="dashboard-card">
+
+                        <h3>
+
+                            👀 Vista previa de reseñas
+
+                        </h3>
+
+                        <p>
+
+                            Primeras reseñas utilizadas
+                            durante el análisis.
+
+                        </p>
+
+                        <div id="reviewsPreview">
+
+                            Esperando análisis...
+
+                        </div>
+
+                    </div>
+
+                    <!-- EXPORTACIONES -->
+
+                    <div class="dashboard-card">
+
+                        <h3>
+
+                            📥 Exportar resultados
+
+                        </h3>
+
+                        <p>
+
+                            Descarga los resultados del
+                            análisis en diferentes formatos.
+
+                        </p>
+
+                        <div class="export-buttons">
+
+                            <button
+                                id="exportJson"
+                                disabled
+                            >
+
+                                JSON
+
+                            </button>
+
+                            <button
+                                id="exportCsv"
+                                disabled
+                            >
+
+                                CSV
+
+                            </button>
+
+                            <button
+                                id="exportExcel"
+                                disabled
+                            >
+
+                                Excel
+
+                            </button>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
