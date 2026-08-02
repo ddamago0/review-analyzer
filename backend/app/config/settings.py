@@ -4,7 +4,6 @@ Handles all application settings and constants.
 """
 
 from pathlib import Path
-from typing import Optional
 
 # Application settings
 APP_NAME = "Review Analyzer"
@@ -44,3 +43,21 @@ POSSIBLE_COLUMNS = [
     "observacion",
     "observaciones"
 ]
+
+# Token encoding (OpenAI o200k_base)
+TOKEN_ENCODING = "o200k_base"
+
+# Translation settings
+TRANSLATION_SOURCE_LANG = "es"
+TRANSLATION_TARGET_LANG = "en"
+
+# Number of reviews used to estimate token reduction during batch processing.
+# Translating every single review through an external service is impractical
+# at scale, so a representative sample is used and extrapolated.
+TRANSLATION_SAMPLE_SIZE = 50
+
+# Cost model (USD)
+# https://openai.com/api/pricing/
+PRICE_PER_MILLION_INPUT_TOKENS = 2.50
+REVIEWS_PER_DAY = 10000
+DAYS_PER_MONTH = 30

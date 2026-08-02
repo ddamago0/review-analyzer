@@ -1,11 +1,12 @@
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import pandas as pd
 import logging
 
 from app.models.review import ReviewDataset
 from app.services.cleaning_service import CleaningService
+from app.services.column_detector_service import ColumnDetectorService
 from app.config.settings import POSSIBLE_COLUMNS
 from app.exceptions import ColumnDetectionError, InvalidFileError
 
@@ -75,10 +76,15 @@ class ExcelService:
     def detect_review_column(df: pd.DataFrame) -> Optional[str]:
         """
         Detect the column that likely contains reviews.
-        
+
+        Strategy:
+        1. Exact keyword match against POSSIBLE_COLUMNS
+        2. Partial keyword match
+        3. Content-based scoring via ColumnDetectorService
+
         Args:
             df (pd.DataFrame): DataFrame to analyze
-            
+
         Returns:
             Optional[str]: Name of the review column, or None if not found
         """
@@ -95,5 +101,11 @@ class ExcelService:
             for possible in POSSIBLE_COLUMNS:
                 if possible in name:
                     return column
+
+        # Finally, score columns by their content
+        detected = ColumnDetectorService.detect(df)
+        if detected is not None:
+            logger.debug(f"Content-based column detection: {detected}")
+            return detected
                     
         return None

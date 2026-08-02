@@ -2,7 +2,7 @@ from dataclasses import asdict
 from pathlib import Path
 import shutil
 import uuid
-from typing import List, Dict, Any
+from typing import List
 
 from fastapi import (
     APIRouter,
@@ -15,8 +15,6 @@ import logging
 
 from app.services.processing_service import ProcessingService
 from app.config.settings import UPLOAD_FOLDER
-from app.exceptions import ValidationError, InvalidFileError
-from app.utils.validation import validate_file_path
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +23,8 @@ router = APIRouter()
 @router.post("/upload")
 async def upload_excel(
     files: List[UploadFile] = File(...),
-    limit: str = Form("")
+    limit: str = Form(""),
+    optimize_tokens: str = Form("false")
 ):
     """
     Upload and process Excel files containing reviews.
@@ -33,6 +32,7 @@ async def upload_excel(
     Args:
         files: List of uploaded Excel files
         limit: Optional limit on number of reviews to process
+        optimize_tokens: Whether to run the token optimization pipeline
         
     Returns:
         Dictionary with processing results
@@ -42,7 +42,10 @@ async def upload_excel(
     """
     
     logger.info(f"Received {len(files)} files for processing")
-    
+
+    run_token_analysis = optimize_tokens.strip().lower() in ("true", "1", "on", "yes")
+    logger.info(f"Token optimization pipeline enabled: {run_token_analysis}")
+
     if len(files) == 0:
         raise HTTPException(
             status_code=400,
@@ -87,7 +90,8 @@ async def upload_excel(
         
         result = ProcessingService.process_files(
             saved_files,
-            review_limit
+            review_limit,
+            optimize_tokens=run_token_analysis
         )
 
         return {
@@ -96,7 +100,8 @@ async def upload_excel(
             "files_processed": len(saved_files),
             "data": asdict(result["dataset"]),
             "statistics": result["statistics"],
-            "word_frequency": result["word_frequency"]
+            "word_frequency": result["word_frequency"],
+            "token_analysis": result["token_analysis"]
         }
 
     except Exception as e:

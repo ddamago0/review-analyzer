@@ -1,17 +1,48 @@
-# Entorno virtual
-backend/.venv/
-
-# Caché de Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 
-# Archivos temporales
-*.log
-*.tmp
+# C extensions
+*.so
+dist/
+build/
+*.egg-info/
 
-# Configuración de VS Code
+# Distribution / packaging
+.Python
+env/
+venv/
+.venv/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  - https://pyinstaller.readthedocs.io/en/latest/usage.html#cmdoption-onefile
+*.exe
+*.exe.local
+
+# IDE
 .vscode/
+.idea/
+*.swp
+*.swo
 
-# Sistema operativo
+# OS generated
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+
+# Uploads
+backend/uploads/

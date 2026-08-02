@@ -17,9 +17,6 @@
         href="css/style.css"
     >
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
 
 <body>
@@ -37,7 +34,8 @@
         <p>
 
             Plataforma para el procesamiento y análisis
-            masivo de reseñas almacenadas en archivos Excel.
+            masivo de reseñas almacenadas en archivos Excel,
+            incluyendo optimización de tokens con o200k_base.
 
         </p>
 
@@ -161,6 +159,31 @@
 
                 >
 
+                <div class="checkbox-group">
+
+                    <label>
+
+                        <input
+
+                            id="optimizeTokens"
+
+                            type="checkbox"
+
+                        >
+
+                        Reducir costos por tokens
+
+                    </label>
+
+                    <small>
+
+                        Traduce las reseñas al inglés y
+                        estima el ahorro mensual usando
+                        el tokenizador o200k_base.
+                    </small>
+
+                </div>
+
                 <button
 
                     id="uploadButton"
@@ -172,6 +195,64 @@
                     🚀 Iniciar análisis
 
                 </button>
+
+            </div>
+
+            <div class="panel">
+
+                <h2>
+
+                    🔍 Análisis de tokens
+
+                </h2>
+
+                <p class="panel-description">
+
+                    Escribe una reseña en español para
+                    comparar sus tokens contra la versión
+                    traducida al inglés y proyectar el
+                    ahorro mensual estimado.
+
+                </p>
+
+                <label class="sr-only" for="tokenInput">
+
+                    Texto de la reseña
+
+                </label>
+
+                <textarea
+                    id="tokenInput"
+                    placeholder="Ejemplo: La aplicación se bloquea cada vez que intento subir una foto de perfil desde mi galería del teléfono."
+                ></textarea>
+
+                <button
+
+                    id="tokenAnalyzeBtn"
+
+                    class="analysis-button"
+
+                >
+
+                    🔬 Analizar tokens
+
+                </button>
+
+                <div
+
+                    id="tokenResult"
+
+                    class="token-result"
+
+                >
+
+                    <div class="empty">
+
+                        Esperando texto para analizar...
+
+                    </div>
+
+                </div>
 
             </div>
 
@@ -238,28 +319,6 @@
 
                 <div class="dashboard-grid">
 
-                    <!-- GRAFICO -->
-
-                    <div class="dashboard-card">
-
-                        <h3>
-
-                            📊 Palabras más utilizadas
-
-                        </h3>
-
-                        <p>
-
-                            Muestra las palabras con mayor
-                            número de apariciones después
-                            del proceso de limpieza.
-
-                        </p>
-
-                        <canvas id="wordsChart"></canvas>
-
-                    </div>
-
                     <!-- TABLA -->
 
                     <div class="dashboard-card">
@@ -278,7 +337,11 @@
 
                         </p>
 
-                        <div id="topWordsTable">
+                        <div class="table-scroll">
+
+                            <div id="topWordsTable">
+
+                            </div>
 
                         </div>
 
@@ -304,6 +367,39 @@
                         <div id="reviewsPreview">
 
                             Esperando análisis...
+
+                        </div>
+
+                    </div>
+
+                    <!-- OPTIMIZACION DE TOKENS -->
+
+                    <div class="dashboard-card">
+
+                        <h3>
+
+                            💡 Optimización de tokens
+
+                        </h3>
+
+                        <p>
+
+                            Comparación entre los tokens
+                            de las reseñas originales y
+                            sus traducciones al inglés,
+                            con el ahorro mensual estimado.
+
+                        </p>
+
+                        <div id="tokenAnalysisContainer">
+
+                            <div class="empty">
+
+                                Activa la opción
+                                "Reducir costos por tokens"
+                                para ver esta sección.
+
+                            </div>
 
                         </div>
 

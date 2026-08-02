@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional
 import re
 import pandas as pd
 import logging
@@ -16,17 +16,18 @@ class ColumnDetectorService:
     def detect(df: pd.DataFrame) -> Optional[str]:
         """
         Detect the most likely review column in the DataFrame.
-        
+
         Args:
             df (pd.DataFrame): DataFrame to analyze
-            
+
         Returns:
-            Optional[str]: Name of the detected column, or None if not found
+            Optional[str]: Name of the detected column, or None if no
+                column has a positive (text-like) score
         """
         logger.debug("Detecting column containing reviews...")
         
         best_column = None
-        best_score = -1
+        best_score = 0
         
         for column in df.columns:
             score = ColumnDetectorService.score_column(df, column)

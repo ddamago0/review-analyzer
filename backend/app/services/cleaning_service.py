@@ -1,5 +1,4 @@
 from typing import List, Tuple
-import re
 import logging
 
 from app.utils.validation import validate_review_text

@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.upload import router as upload_router
+from app.api.analyze import router as analyze_router
+from app.api.export import router as export_router
 from app.core.logging_config import setup_logging
 
 # Setup logging
@@ -24,6 +26,8 @@ app.add_middleware(
 
 # Registrar rutas
 app.include_router(upload_router, prefix="/api")
+app.include_router(analyze_router, prefix="/api")
+app.include_router(export_router, prefix="/api")
 
 # Ruta de prueba
 @app.get("/")

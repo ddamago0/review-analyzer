@@ -3,6 +3,7 @@ import logging
 
 from app.models.review import ReviewDataset
 from app.services.excel_service import ExcelService
+from app.services.analyze_service import AnalyzeService
 from app.utils.validation import remove_duplicates
 
 from app.analyzers.statistics_analyzer import StatisticsAnalyzer
@@ -18,7 +19,8 @@ class ProcessingService:
     @staticmethod
     def process_files(
         file_paths: List[str],
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
+        optimize_tokens: bool = False
     ) -> Dict[str, Any]:
         """
         Process multiple Excel files and unify all reviews.
@@ -26,6 +28,7 @@ class ProcessingService:
         Args:
             file_paths (List[str]): List of file paths to process
             limit (Optional[int]): Optional limit on number of reviews to return
+            optimize_tokens (bool): Whether to run the token optimization pipeline
             
         Returns:
             Dict[str, Any]: Processing results including dataset, statistics, and word frequency
@@ -68,7 +71,7 @@ class ProcessingService:
         # Perform analysis
         statistics = StatisticsAnalyzer.analyze(unique_reviews)
         word_frequency = WordFrequencyAnalyzer.analyze(unique_reviews, top=20)
-        
+
         # Create final dataset
         dataset = ReviewDataset(
             column_name=detected_column,
@@ -82,8 +85,18 @@ class ProcessingService:
         response = {
             "dataset": dataset,
             "statistics": statistics,
-            "word_frequency": word_frequency
+            "word_frequency": word_frequency,
         }
-        
+
+        # Run the token optimization pipeline when requested
+        if optimize_tokens:
+            logger.info("Running token optimization pipeline...")
+            response["token_analysis"] = AnalyzeService.analyze_batch(unique_reviews)
+        else:
+            response["token_analysis"] = {
+                "enabled": False,
+                "reviews_analyzed": 0,
+            }
+
         logger.info(f"Processing complete. Total reviews: {len(unique_reviews)}")
         return response
